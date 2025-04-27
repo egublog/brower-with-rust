@@ -3,10 +3,11 @@
 HOME_PATH=$PWD
 TARGET_PATH=$PWD"/build"
 OS_PATH=$TARGET_PATH"/wasabi"
+# アプリケーションの名前がsabaとは異なるとき、次の行を変更する
 APP_NAME="saba"
 MAKEFILE_PATH=$HOME_PATH"/Makefile"
 
-# execute `mkdir build/` if it doesn't exist
+# buildディレクトリを作成する
 if [ -d $TARGET_PATH ]
 then
   echo $TARGET_PATH" exists"
@@ -15,8 +16,9 @@ else
   mkdir $TARGET_PATH
 fi
 
-# install Wasabi OS (https://github.com/hikalium/wasabi)
-# You should manually remove wasabi/ if it's conflict via `rm -rf $OS_PATH`
+# WasabiOSをダウンロードする（https://github.com/hikalium/wasabi）
+# もしスクリプトが失敗する場合は、`rm -rf build/wasabi`などで
+# ダウンロードしたOSを削除する必要がある
 if [ -d $OS_PATH ]
 then
   echo $OS_PATH" exists"
@@ -30,10 +32,10 @@ else
   git clone --branch for_saba git@github.com:hikalium/wasabi.git
 fi
 
-# go back to the application top directory
+# アプリケーションのトップディレクトリに移動する
 cd $HOME_PATH
 
-# download Makefile if it doesn't exist
+# Makefileをダウンロードする
 if [ ! -f $MAKEFILE_PATH ]; then
   echo "downloading Makefile..."
   wget https://raw.githubusercontent.com/hikalium/wasabi/for_saba/external_app_template/Makefile
