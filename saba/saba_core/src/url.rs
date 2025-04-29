@@ -14,7 +14,21 @@ impl Url {
         if self.url.contains("http://") {
             return true;
         }
-        return false;
+        false
+    }
+
+    fn extract_host(&self) -> String {
+      let url_parts: Vec<&str> = self
+        .url
+        .trim_start_matches("http://")
+        .splitn(2, "/")
+        .collect();
+
+      if let Some(index) = url_parts[0].find(':') {
+          url_parts[0][..index].to_string()
+        } else {
+          url_parts[0].to_string()
+        }
     }
 
     pub fn parse(&mut self) -> Result<Self,String> {
