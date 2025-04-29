@@ -31,6 +31,20 @@ impl Url {
         }
     }
 
+    fn extract_port(&self) -> String {
+      let url_parts: Vec<&str> = self
+          .url
+          .trim_start_matches("http://")
+          .splitn(2, "/")
+          .collect();
+
+      if let Some(index) = url_parts[0].find(':') {
+          url_parts[0][index + 1..].to_string()
+      } else {
+          "80".to_string()
+      }
+  }
+
     pub fn parse(&mut self) -> Result<Self,String> {
         if !self.is_http() {
             return Err("Only HTTP scheme is supported".to_string());
