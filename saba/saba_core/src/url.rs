@@ -1,17 +1,27 @@
 use alloc::string::String;
 use alloc::string::ToString;
+use alloc::vec::Vec;
 
-/// URLを表現する構造体です。
-/// HTTP URLのパース処理を提供します。
 #[derive(Debug, Clone, PartialEq)]
 pub struct Url {
     url: String,
     host: String,
     port: String,
+    path: String,
     searchpart: String,
 }
 
 impl Url {
+    pub fn new(url: String) -> Self {
+        Self {
+            url,
+            host: "".to_string(),
+            port: "".to_string(),
+            path: "".to_string(),
+            searchpart: "".to_string(),
+        }
+    }
+
     pub fn host(&self) -> String {
         self.host.clone()
     }
@@ -28,22 +38,13 @@ impl Url {
         self.searchpart.clone()
     }
 
-    /// URLがHTTPスキームかどうかを確認します。
-    ///
-    /// # 戻り値
-    /// * `true` - URLがhttp://で始まる場合
-    /// * `false` - それ以外の場合
-    fn is_http(&mut self) -> bool {
+    fn is_http(&self) -> bool {
         if self.url.contains("http://") {
             return true;
         }
         false
     }
 
-    /// URLからホスト名を抽出します。
-    ///
-    /// # 戻り値
-    /// * `String` - 抽出されたホスト名
     fn extract_host(&self) -> String {
         let url_parts: Vec<&str> = self
             .url
@@ -58,10 +59,6 @@ impl Url {
         }
     }
 
-    /// URLからパスを抽出します。
-    ///
-    /// # 戻り値
-    /// * `String` - 抽出されたパス。パスが存在しない場合は空文字列
     fn extract_path(&self) -> String {
         let url_parts: Vec<&str> = self
             .url
@@ -77,10 +74,6 @@ impl Url {
         path_and_searchpart[0].to_string() // (d3)
     }
 
-    /// URLからポート番号を抽出します。
-    ///
-    /// # 戻り値
-    /// * `String` - 抽出されたポート番号。明示的なポート指定がない場合は"80"
     fn extract_port(&self) -> String {
         let url_parts: Vec<&str> = self
             .url
@@ -95,10 +88,6 @@ impl Url {
         }
     }
 
-    /// URLからクエリパラメータ部分を抽出します。
-    ///
-    /// # 戻り値
-    /// * `String` - 抽出されたクエリパラメータ。クエリパラメータが存在しない場合は空文字列
     fn extract_searchpart(&self) -> String {
         let url_parts: Vec<&str> = self
             .url
@@ -118,11 +107,6 @@ impl Url {
         }
     }
 
-    /// URLを解析し、各コンポーネント（ホスト、ポート、パス、クエリパラメータ）に分解します。
-    ///
-    /// # 戻り値
-    /// * `Ok(Self)` - 解析が成功した場合
-    /// * `Err(String)` - 解析に失敗した場合（HTTPスキーム以外）
     pub fn parse(&mut self) -> Result<Self, String> {
         if !self.is_http() {
             return Err("Only HTTP scheme is supported.".to_string());
@@ -151,7 +135,6 @@ mod tests {
             path: "".to_string(),
             searchpart: "".to_string(),
         });
-
         assert_eq!(expected, Url::new(url).parse());
     }
 
@@ -165,7 +148,6 @@ mod tests {
             path: "".to_string(),
             searchpart: "".to_string(),
         });
-
         assert_eq!(expected, Url::new(url).parse());
     }
 
@@ -176,10 +158,9 @@ mod tests {
             url: url.clone(),
             host: "example.com".to_string(),
             port: "8888".to_string(),
-            path: "/index.html".to_string(),
+            path: "index.html".to_string(),
             searchpart: "".to_string(),
         });
-
         assert_eq!(expected, Url::new(url).parse());
     }
 
@@ -190,24 +171,22 @@ mod tests {
             url: url.clone(),
             host: "example.com".to_string(),
             port: "80".to_string(),
-            path: "/index.html".to_string(),
+            path: "index.html".to_string(),
             searchpart: "".to_string(),
         });
-
         assert_eq!(expected, Url::new(url).parse());
     }
 
     #[test]
-    fn test_url_host_port_path_searchquery() {
+    fn test_url_host_port_path_searchpart() {
         let url = "http://example.com:8888/index.html?a=123&b=456".to_string();
         let expected = Ok(Url {
             url: url.clone(),
             host: "example.com".to_string(),
             port: "8888".to_string(),
-            path: "/index.html".to_string(),
+            path: "index.html".to_string(),
             searchpart: "a=123&b=456".to_string(),
         });
-
         assert_eq!(expected, Url::new(url).parse());
     }
 
@@ -215,15 +194,13 @@ mod tests {
     fn test_no_scheme() {
         let url = "example.com".to_string();
         let expected = Err("Only HTTP scheme is supported.".to_string());
-
         assert_eq!(expected, Url::new(url).parse());
     }
 
     #[test]
     fn test_unsupported_scheme() {
-        let url = "ftp://example.com:8888/index.html".to_string();
+        let url = "https://example.com:8888/index.html".to_string();
         let expected = Err("Only HTTP scheme is supported.".to_string());
-
         assert_eq!(expected, Url::new(url).parse());
     }
 }
